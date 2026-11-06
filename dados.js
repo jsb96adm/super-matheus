@@ -195,7 +195,7 @@ window.DADOS = {
      Trilha de cada capítulo: rock instrumental gerado pelo próprio jogo (sem direitos de terceiros).
      Álbum final: piano original composto para o jogo (album.mp3).
      "🎵 Músicas desta fase": vídeos oficiais do YouTube, abertos num player visível com o jogo pausado. */
-  musicaHomenagem: "album.mp3",          // piano original, por baixo da mensagem do Jean
+  musicaHomenagem: "saturn.mp3",         // Sleeping At Last - Saturn, por baixo do texto escrito pro Matheus
   musicaAlbum: "so_os_loucos_sabem.mp3",   // Charlie Brown Jr., escolhida pelo Jean para o álbum final
   musicas: [
     { fase: 1, titulo: "Zeh Nery e VOLGAN ao vivo no NY Pub", artista: "Volgan Rock (canal da banda)", youtubeId: "3a5deMW-3Gc" },
@@ -508,7 +508,7 @@ window.DADOS = {
             { id: "jean", x: 2000, oculto: true, visual: { camisa: "#151515" } },
             { id: "julia", x: 2000, oculto: true }, { id: "kevin", x: 2000, oculto: true },
             { id: "isaac", x: 2000, oculto: true }, { id: "luana", x: 2000, oculto: true },
-            { id: "gui", x: 2000, oculto: true }, { id: "thiago", x: 2000, oculto: true }
+            { id: "thiago", x: 2000, oculto: true }
           ],
           objetos: [{ id: "portao", tipo: "portaCasa", x: 260 }, { id: "tv", tipo: "tv", x: 700 }, { id: "violao", tipo: "violao", x: 1020 }],
           intro: [{ quem: "narrador", texto: "2026. Uma casa maior, com piscina e porta aberta." }],
@@ -520,14 +520,14 @@ window.DADOS = {
             { alvo: "tv", obj: "Dia de jogo. Ligue a TV.", rotulo: "Ligar o jogo 📺", ativa: "tv", efeito: "torcida",
               bolhas: [{ quem: "kevin", texto: "GOOOL! ⚽" }, { quem: "julia", texto: "🇧🇷🇧🇷" }],
               video: { src: "casa_jogo.mp4", titulo: "Jogo na casa do Matheus", texto: "Registro real: o Core assistindo ao jogo. Junho de 2026." } },
-            { alvo: "violao", obj: "Pegue o violão.", rotulo: "Tocar ♪", efeito: "notas", ativa: "violao", chegam: ["gui"], posicoes: [1120],
+            { alvo: "violao", obj: "Pegue o violão.", rotulo: "Tocar ♪", efeito: "notas", ativa: "violao",
               bolhas: [{ quem: "isaac", texto: "Essa aí dá som! 🎧" }],
               video: { src: "casa_core.mp4", titulo: "Violão em casa", texto: "Registro real: agosto de 2026." } },
             { alvo: "jean", obj: "O Jean quer te mostrar uma ideia.", rotulo: "Conversar 💬", poder: "incentivar",
               escolha: { pergunta: "O Jean contou um plano novo. Como você ajuda?", opcoes: [
                 { texto: "👂 Ouvir até o fim", bolhas: [{ quem: "jean", texto: "Faz sentido falando em voz alta." }] },
                 { texto: "❓ Fazer perguntas", bolhas: [{ quem: "jean", texto: "Boa pergunta. Vou ajustar isso." }] },
-                { texto: "🙋 Chamar o Gui pra opinar", bolhas: [{ quem: "gui", texto: "Dá pra começar pequeno." }] } ] },
+                { texto: "🙋 Chamar o Thiago pra opinar", bolhas: [{ quem: "thiago", texto: "Dá pra começar pequeno." }] } ] },
               efeito: "incentivo",
               falas: [
                 { quem: "matheus", texto: "E aquele meu plano? Me dá sua opinião sincera." },
