@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0f1d4a">
+<title>Super Matheus</title>
+<style>
+:root{--amarelo:#f6b826;--laranja:#f07b1d;--preto:#111;--vermelho:#d93a2b;--petroleo:#0f5c63;--creme:#fff3d6;--roxo:#7a3cff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#111;color:#fff;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;overscroll-behavior:none}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+button{font-family:inherit;cursor:pointer}
+.oculto{display:none!important}
+
+#hud{position:fixed;top:0;left:0;right:0;padding:calc(10px + env(safe-area-inset-top)) 12px 0;display:flex;gap:8px;align-items:flex-start;pointer-events:none;z-index:3}
+#objetivo{flex:1;min-width:0;background:rgba(17,17,17,.88);border:2px solid var(--amarelo);border-radius:12px;padding:7px 12px;font-size:15px;line-height:1.3}
+#objetivo small{display:block;color:var(--amarelo);font-weight:800;letter-spacing:.08em;font-size:10px;text-transform:uppercase}
+.icone{pointer-events:auto;flex:0 0 44px;width:44px;height:44px;border-radius:12px;border:2px solid #fff4;background:rgba(17,17,17,.88);color:#fff;font-size:19px;display:flex;align-items:center;justify-content:center}
+#pular{pointer-events:auto;flex:0 0 auto;height:44px;padding:0 14px;border-radius:12px;border:2px solid var(--amarelo);background:rgba(17,17,17,.88);color:var(--amarelo);font-weight:800;font-size:14px}
+
+#aviso{position:fixed;left:50%;top:calc(78px + env(safe-area-inset-top));transform:translateX(-50%);background:var(--amarelo);color:#111;font-weight:800;padding:8px 14px;border-radius:999px;font-size:14px;max-width:calc(100% - 32px);text-align:center;box-shadow:3px 3px 0 #000;opacity:0;transition:opacity .25s;pointer-events:none;z-index:4}
+#aviso.on{opacity:1}
+
+#controles{position:fixed;left:0;right:0;bottom:0;padding:12px 16px calc(16px + env(safe-area-inset-bottom));display:flex;justify-content:space-between;align-items:flex-end;pointer-events:none;z-index:3}
+.grupo{display:flex;gap:12px;align-items:flex-end}
+.btn{pointer-events:auto;border:3px solid #111;border-radius:50%;width:70px;height:70px;font-size:26px;font-weight:900;color:#111;background:var(--creme);box-shadow:0 4px 0 #000;display:flex;align-items:center;justify-content:center;touch-action:none}
+.btn.ativo,.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #000}
+#acao{width:auto;min-width:100px;max-width:46vw;border-radius:40px;padding:0 16px;font-size:15px;line-height:1.1;background:var(--amarelo)}
+#acao:disabled{opacity:.5}
+#camisa{background:var(--vermelho);color:#fff;width:58px;height:58px;font-size:22px}
+#camisa.sem{background:var(--petroleo)}
+
+#dialogo{position:fixed;left:12px;right:12px;bottom:calc(16px + env(safe-area-inset-bottom));max-width:720px;margin:0 auto;background:var(--creme);color:#111;border:3px solid #111;border-radius:16px;padding:12px 14px;display:none;gap:12px;box-shadow:6px 6px 0 var(--laranja);z-index:5;pointer-events:auto}
+#dialogo.on{display:flex}
+.retrato{flex:0 0 60px;height:60px;border-radius:12px;border:3px solid #111;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:#111;overflow:hidden;background-size:cover;background-position:center}
+#dlgNome{font-weight:900;text-transform:uppercase;letter-spacing:.05em;font-size:13px}
+#dlgPapel{font-weight:600;color:#666;font-size:12px;margin-left:6px;text-transform:none;letter-spacing:0}
+#dlgTexto{font-size:17px;line-height:1.35;margin-top:3px}
+#dlgSeg{font-size:12px;color:#777;text-align:right;margin-top:4px}
+
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
+.modal.on{display:flex}
+.cartao{background:var(--creme);color:#111;border:3px solid #111;border-radius:18px;padding:20px;max-width:480px;width:100%;box-shadow:8px 8px 0 var(--laranja);max-height:100%;overflow:auto;touch-action:pan-y}
+.cartao h2{margin:0 0 6px;font-size:24px;font-weight:900;letter-spacing:-.01em}
+.cartao p{margin:6px 0 12px;line-height:1.4}
+.principal{display:block;width:100%;border:3px solid #111;background:var(--amarelo);color:#111;font-weight:900;font-size:18px;padding:13px;border-radius:12px;box-shadow:0 4px 0 #111;margin-top:10px}
+.secundario{display:block;width:100%;border:2px solid #111;background:transparent;color:#111;font-weight:700;font-size:15px;padding:10px;border-radius:12px;margin-top:8px}
+.musica{display:block;width:100%;text-align:left;border:3px solid #111;background:#fff;color:#111;font-weight:700;font-size:16px;padding:12px;border-radius:12px;margin:8px 0}
+.musica.feita{background:var(--amarelo)}
+.musica .n{display:inline-block;width:26px;font-weight:900}
+.treme{animation:treme .3s}
+@keyframes treme{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.etiqueta{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--vermelho)}
+.prov{border:3px dashed #111;border-radius:12px;background:#111;color:#fff;overflow:hidden}
+.prov svg{display:block;width:100%;height:auto}
+.prov .rot{font-size:12px;padding:8px 10px;background:#222;color:var(--amarelo);font-family:ui-monospace,monospace}
+#midiaConteudo video,#midiaConteudo img{display:block;width:100%;border-radius:12px;border:3px solid #111;background:#000}
+.foto{width:100%;max-height:34vh;object-fit:cover;border-radius:12px;border:3px solid #111;display:block}
+.conq{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid #0002}
+.conq b{display:block}
+.conq span{font-size:13px;color:#555}
+.conq .ico{flex:0 0 34px;height:34px;border-radius:50%;border:2px solid #111;display:flex;align-items:center;justify-content:center;font-size:16px;background:#ddd}
+.conq.ok .ico{background:var(--amarelo)}
+.conq:not(.ok){opacity:.55}
+
+#inicio{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at 50% 30%,#3a1f6b 0,#111 70%)}
+#inicio .caixa{max-width:440px;width:100%;text-align:center}
+#inicio .copo{width:130px;height:180px;margin:0 auto 14px;border-radius:16px;border:4px solid var(--amarelo);background:#f7a400 center/cover;box-shadow:6px 6px 0 var(--vermelho)}
+#inicio h1{font-size:44px;line-height:.95;margin:0;font-weight:900;color:var(--amarelo);text-shadow:4px 4px 0 var(--vermelho),7px 7px 0 #000;letter-spacing:-.02em}
+#inicio h1 span{display:block;font-size:30px;color:#fff;text-shadow:3px 3px 0 var(--petroleo),5px 5px 0 #000}
+#inicio .sub{margin:16px 0 6px;font-size:15px;color:#ddd}
+#inicio .aviso{font-size:12px;color:#aaa;margin-top:14px}
+#inicio .teclas{font-size:12px;color:#999;margin-top:6px}
+
+/* ---------- v2: mapa, música, sequência ---------- */
+#mapa{position:fixed;inset:0;z-index:15;background:#0f3550;display:flex;flex-direction:column}
+#mapaTopo{display:flex;gap:8px;align-items:center;padding:calc(10px + env(safe-area-inset-top)) 12px 6px}
+#mapaTopo .tit{flex:1;min-width:0}
+#mapaTopo .tit b{display:block;font-size:20px;font-weight:900;color:var(--amarelo);text-shadow:2px 2px 0 #000;line-height:1}
+#mapaTopo .tit span{font-size:13px;color:#dfe}
+.abas{display:flex;gap:6px;padding:0 12px 6px}
+.aba{flex:1;border:2px solid #fff4;background:rgba(0,0,0,.35);color:#fff;font-weight:800;font-size:13px;padding:7px;border-radius:10px}
+.aba.on{background:var(--amarelo);color:#111;border-color:#111}
+#mapaSvg{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+#mapaSvg svg{width:100%;height:100%;display:block}
+.mtx{font-family:Arial Black,Arial;font-weight:900;text-anchor:middle;fill:#fff;paint-order:stroke;stroke:#111;stroke-width:6px}
+.mtx.terra{font-size:34px;fill:#ffffff55;stroke:none;letter-spacing:.2em}
+.mtx.nome{font-size:22px}
+.no{cursor:pointer}
+.no .disco{fill:#fff3d6;stroke:#111;stroke-width:5}
+.no .ic{font-size:40px;text-anchor:middle}
+.no .num{fill:#111;stroke:#fff;stroke-width:3}
+.no .ntx{font:900 16px Arial;fill:#fff;text-anchor:middle}
+.no.concl .disco{fill:var(--amarelo)}
+.no.concl .num{fill:#1f8a4f}
+.no.fut .disco{fill:#9aa3ad}
+.no.fut .ic{opacity:.55}
+.no.n2 .disco{fill:#3a2a6b;stroke:#c9a8ff}
+.no.n2 .ic{opacity:1}
+.no.sel .disco{stroke:var(--amarelo);stroke-width:9}
+.no .pulso{fill:none;stroke:var(--amarelo);stroke-width:5;animation:pulso 1.4s infinite;transform-origin:center;transform-box:fill-box}
+@keyframes pulso{0%{opacity:1;transform:scale(.8)}100%{opacity:0;transform:scale(1.25)}}
+.avatar{animation:flutua 1.6s ease-in-out infinite;transform-box:fill-box}
+@keyframes flutua{50%{transform:translateY(-8px)}}
+#mapaCartao{margin:0 12px calc(12px + env(safe-area-inset-bottom));background:var(--creme);color:#111;border:3px solid #111;border-radius:16px;padding:12px 14px;box-shadow:5px 5px 0 var(--laranja);max-width:560px;align-self:center;width:calc(100% - 24px)}
+#mcNum{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--vermelho)}
+#mcNome{font-size:22px;font-weight:900;margin:2px 0}
+#mcSub{font-size:14px;color:#444;line-height:1.35}
+#mcEntrar:disabled{opacity:.6;background:#ddd}
+#mapaBanner{position:fixed;left:50%;top:calc(96px + env(safe-area-inset-top));transform:translateX(-50%);background:var(--amarelo);color:#111;font-weight:900;padding:9px 16px;border-radius:999px;box-shadow:3px 3px 0 #000;opacity:0;transition:opacity .3s;pointer-events:none;z-index:16;max-width:calc(100% - 32px);text-align:center;font-size:14px}
+#mapaBanner.on{opacity:1}
+#mapaApagar{background:none;border:0;color:#ffffff66;font-size:11px;padding:4px 12px 0;align-self:flex-end}
+.ytLinha{display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-top:1px solid #0002;padding:9px 0}
+.ytLinha>div{flex:1;min-width:140px}.ytLinha b{display:block}.ytLinha span{font-size:13px;color:#555}
+.ytBtn{border:2px solid #111;background:var(--amarelo);font-weight:900;border-radius:10px;padding:8px 12px}
+.ytLink{font-size:13px;font-weight:700;color:#0f5c63}
+#ytPlayer iframe{width:100%;aspect-ratio:16/9;min-height:200px;border:3px solid #111;border-radius:12px;display:block;background:#000}
+.ytAjuda{font-size:12px;color:#555}
+#finalTrecho{font-style:italic;font-weight:700;color:#0f5c63}
+@media (orientation:landscape) and (max-height:500px){#mapaCartao{position:absolute;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));width:290px;margin:0;padding:8px 12px}#mapaApagar{position:absolute;left:4px;bottom:4px}.abas{position:absolute;left:12px;top:calc(56px + env(safe-area-inset-top));flex-direction:column;width:170px;z-index:2}#mapaSvg{padding-left:170px;padding-right:300px}#mcNome{font-size:18px}#mcSub{font-size:13px}.principal{padding:9px;font-size:16px;margin-top:6px}#mapaTopo .tit b{font-size:17px}}
+
+/* ================= v3 ================= */
+#inicio{background:radial-gradient(circle at 50% 28%,#2c4fb8 0,#0f1d4a 55%,#070b1e 100%);overflow:auto}
+#inicio .caixa{max-width:460px}
+.heroi{position:relative;width:220px;height:250px;margin:0 auto 4px}
+.capaHeroi{position:absolute;left:30px;right:30px;top:40px;bottom:0;background:linear-gradient(180deg,#d4202f,#8a0f1c);clip-path:polygon(30% 0,70% 0,100% 100%,50% 92%,0 100%);animation:capa 2.4s ease-in-out infinite;transform-origin:50% 0}
+@keyframes capa{50%{transform:skewX(-4deg) scaleX(1.05)}}
+#inicio .copo{position:absolute;inset:0;width:auto;height:auto;margin:0;border:0;border-radius:0;box-shadow:none;background:center bottom/contain no-repeat}
+.brilhos{position:absolute;left:0;right:0;top:4px;color:#f6b826;font-size:22px;letter-spacing:.6em;animation:pisca 1.6s infinite}
+@keyframes pisca{50%{opacity:.3}}
+.fita{display:inline-block;background:#f6b826;color:#111;font-weight:900;letter-spacing:.2em;font-size:13px;padding:5px 14px;border-radius:4px;box-shadow:3px 3px 0 #d4202f;transform:rotate(-2deg);margin-bottom:8px}
+#inicio h1{font-size:50px;color:#fff;text-shadow:4px 4px 0 #d4202f,7px 7px 0 #000}
+#inicio .sub{color:#ffe7a8;font-weight:700}
+.icone.poderes{flex:0 0 auto;width:auto;padding:0 10px;font-weight:900;font-size:14px;color:#f6b826}
+#toastPoder{position:fixed;left:50%;top:30%;transform:translate(-50%,-10px) scale(.9);background:#111;color:#fff;border:3px solid #f6b826;border-radius:16px;padding:12px 20px;text-align:center;opacity:0;transition:all .35s;z-index:30;pointer-events:none;box-shadow:0 0 40px rgba(246,184,38,.5);max-width:calc(100% - 40px)}
+#toastPoder.on{opacity:1;transform:translate(-50%,0) scale(1)}
+#toastPoder small{display:block;color:#f6b826;font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:11px}
+#toastPoder b{display:block;font-size:22px}
+#toastPoder span{font-size:14px;color:#ddd}
+.trilhoTim{position:relative;height:56px;background:#222;border:3px solid #111;border-radius:12px;margin:12px 0;overflow:hidden}
+#timZona{position:absolute;top:0;bottom:0;background:rgba(43,255,138,.35);border-left:2px dashed #2bff8a;border-right:2px dashed #2bff8a}
+#timAlvo{position:absolute;top:12px;font-size:26px;line-height:1}
+.galeria{max-width:560px}
+.galBox{position:relative;display:flex;align-items:center;justify-content:center;background:#111;border:3px solid #111;border-radius:12px;min-height:200px}
+#galImg{max-width:100%;max-height:56vh;display:block;border-radius:8px}
+.galSeta{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:2px solid #fff;background:rgba(0,0,0,.6);color:#fff;font-size:26px;font-weight:900;z-index:2}
+#galAnt{left:6px}#galProx{right:6px}
+#galLegenda{font-weight:700;margin:8px 0 0}#galCont{font-size:12px;color:#666}
+#vidBox video{width:100%;max-height:60vh;border-radius:12px;border:3px solid #111;background:#000;display:block}
+.bordado .tecido{position:relative;height:200px;border-radius:12px;border:3px solid #111;background:repeating-linear-gradient(45deg,#f1e8d6 0 6px,#ece2cf 6px 12px);overflow:hidden}
+.bord{position:absolute;left:50%;top:40px;transform:translateX(-50%) rotate(-6deg);font:italic 700 30px/1.15 "Brush Script MT","Segoe Script",cursive;color:#2a2a2a;text-align:center;text-shadow:0 1px 0 #fff}
+.cinta{position:absolute;left:0;right:0;bottom:18px;height:34px;background:#e6dcc6;border-top:2px dashed #c9b48a;border-bottom:2px dashed #c9b48a;text-align:center;font:italic 700 22px/34px "Brush Script MT","Segoe Script",cursive;color:#3a3a3a}
+.tela{position:fixed;inset:0;z-index:25;display:none;align-items:center;justify-content:center;padding:16px;overflow:auto}
+.tela.on{display:flex}
+#capa{background:rgba(5,8,20,.92);z-index:18}
+.capaCx{display:flex;gap:18px;max-width:820px;width:100%;align-items:center;animation:sobe .5s}
+@keyframes sobe{from{opacity:0;transform:translateY(20px)}}
+#capaFoto{flex:1 1 50%;aspect-ratio:4/5;max-height:70vh;border-radius:16px;border:4px solid #f6b826;background:#111 center/cover;box-shadow:8px 8px 0 #d4202f}
+.capaInfo{flex:1 1 50%;color:#fff}
+#capaNum{color:#f6b826;font-weight:900;letter-spacing:.12em;text-transform:uppercase;font-size:12px}
+#capaNome{font-size:38px;margin:4px 0;line-height:1;font-weight:900}
+#capaSub{color:#cdd6f5;font-weight:700}
+#capaLegenda{font:italic 18px Georgia,serif;color:#ffe7a8}
+.capaInfo .secundario{color:#fff;border-color:#fff6}
+@media (orientation:portrait){#fraseFotos img{height:min(15vh,120px);max-width:38vw;object-fit:cover}#fraseFotos{gap:6px}.capaCx{flex-direction:column}#capaFoto{width:100%;max-height:44vh}#capaNome{font-size:30px}}
+#fraseTela{background:radial-gradient(circle at 50% 40%,#2a1d40,#07060d);z-index:26}
+.fraseCx{max-width:760px;width:100%;text-align:center;color:#fff}
+#fraseNum{color:#f6b826;font-weight:900;letter-spacing:.14em;text-transform:uppercase;font-size:12px}
+#fraseTexto{font:italic 400 clamp(20px,4vw,30px)/1.35 Georgia,serif;margin:14px auto 18px;max-width:640px;animation:sobe 1s}
+#fraseFotos{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:8px}
+#fraseFotos img{height:min(26vh,180px);border-radius:8px;border:3px solid #fff;box-shadow:4px 4px 0 #000;cursor:pointer;animation:polaroid .7s both;transform:rotate(-2deg)}
+#fraseFotos img:nth-child(even){transform:rotate(2deg)}
+@keyframes polaroid{from{opacity:0;transform:translateY(30px) rotate(-8deg) scale(.9)}}
+.fraseCx .principal{max-width:360px;margin:12px auto 0}
+#homenagem{background:linear-gradient(160deg,#0b1030,#1b0d24 60%,#07060d);z-index:27}
+.hCx{max-width:640px;width:100%;color:#fff;text-align:left}
+.hTopo{color:#f6b826;font-weight:900;letter-spacing:.2em;text-transform:uppercase;font-size:12px;margin-bottom:12px}
+#hTexto{font:400 clamp(19px,3.6vw,26px)/1.5 Georgia,serif;white-space:pre-line;min-height:30vh}
+#hTexto.entra{animation:sobe .9s}
+#hAssin{font:italic 24px Georgia,serif;color:#ffe7a8;text-align:right;min-height:30px}
+.hRodape{display:flex;justify-content:space-between;align-items:center;color:#aaa;font-size:13px;margin-top:8px}
+.hRodape .secundario{width:auto;display:inline-block;color:#ccc;border-color:#ccc5;margin:0;padding:6px 12px;font-size:13px}
+#album{background:#050507;z-index:29;padding:0}
+#albPalco{position:absolute;inset:0}
+.slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 1.4s ease}
+.slide.on{opacity:1}
+.fundoBlur{position:absolute;inset:-40px;background:center/cover;filter:blur(30px) brightness(.35);transform:scale(1.1)}
+.slide figure{position:relative;margin:0;display:flex;flex-direction:column;align-items:center;max-width:92vw}
+.kb{overflow:hidden;border-radius:4px;box-shadow:0 20px 60px rgba(0,0,0,.6);animation-duration:7s;animation-timing-function:ease-out;animation-fill-mode:both}
+.kb img{display:block;max-width:86vw;max-height:72vh;object-fit:contain}
+@keyframes kb1{from{transform:scale(1)}to{transform:scale(1.07) translate(-1%,-1%)}}
+@keyframes kb2{from{transform:scale(1.08) translate(1%,0)}to{transform:scale(1)}}
+@keyframes kb3{from{transform:scale(1) translate(0,1%)}to{transform:scale(1.06) translate(1%,-1%)}}
+.slide figcaption{margin-top:16px;text-align:center;color:#fff;max-width:640px;padding:0 16px}
+.slide figcaption small{display:block;color:#f6b826;font:700 12px system-ui;letter-spacing:.24em;text-transform:uppercase;margin-bottom:6px;animation:sobe 1.2s .4s both}
+.slide figcaption span{font:italic clamp(17px,3vw,24px)/1.35 Georgia,serif;animation:sobe 1.2s .8s both;display:block}
+.slide.cap{flex-direction:column}
+.capT{font:italic clamp(30px,7vw,64px) Georgia,serif;color:#fff;text-align:center;padding:0 20px;animation:sobe 1.6s both}
+.linha{width:0;height:2px;background:#f6b826;margin-top:18px;animation:linha 2s .5s forwards}
+@keyframes linha{to{width:160px}}
+.albCtl{position:absolute;left:50%;bottom:calc(12px + env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;gap:8px;align-items:center;background:rgba(0,0,0,.45);padding:6px 10px;border-radius:999px;z-index:3}
+.albCtl button{width:40px;height:40px;border-radius:50%;border:1px solid #fff5;background:transparent;color:#fff;font-size:18px}
+.albCtl span{color:#ccc;font-size:12px;min-width:48px;text-align:center}
+@media (orientation:landscape) and (max-height:500px){#vidBox video{max-height:46vh}#galImg{max-height:44vh}.kb img{max-height:70vh;max-width:60vw}.slide figure{flex-direction:row;gap:22px;align-items:center}.slide figcaption{margin-top:0;text-align:left;max-width:30vw}.albCtl{top:10px;bottom:auto;left:auto;right:10px;transform:none}}
+</style>
+</head>
+<body>
+<canvas id="tela"></canvas>
+
+<div id="hud" class="oculto">
+  <div id="objetivo"><small id="objRot">Objetivo</small><span id="objTexto"></span></div>
+  <button id="pular" class="oculto">Pular ▸</button>
+  <button id="poderesBtn" class="icone poderes" aria-label="Poderes">✦ 0</button>
+  <button id="som" class="icone" aria-label="Som">🔊</button>
+  <button id="musicas" class="icone" aria-label="Músicas desta fase">🎵</button>
+  <button id="irMapa" class="icone" aria-label="Voltar ao mapa">🗺️</button>
+</div>
+<div id="aviso"></div>
+<div id="toastPoder"></div>
+
+<div id="controles" class="oculto">
+  <div class="grupo">
+    <button id="esq" class="btn" aria-label="Esquerda">◀</button>
+    <button id="dir" class="btn" aria-label="Direita">▶</button>
+  </div>
+  <div class="grupo">
+    <button id="camisa" class="btn" aria-label="Camisa">👕</button>
+    <button id="acao" class="btn">Falar</button>
+  </div>
+</div>
+
+<div id="dialogo" role="dialog">
+  <div id="dlgRetrato" class="retrato"></div>
+  <div style="flex:1;min-width:0">
+    <div id="dlgNome"></div>
+    <div id="dlgTexto"></div>
+    <div id="dlgSeg">toque para continuar ▸</div>
+  </div>
+</div>
+
+<div id="modalSetlist" class="modal"><div class="cartao">
+  <div class="etiqueta" id="seqEtiqueta"></div>
+  <h2 id="seqTitulo"></h2>
+  <p id="seqInstr"></p>
+  <div id="listaMusicas"></div>
+  <p id="setDica" style="font-size:13px;color:#666"></p>
+  <button id="seqAjuda" class="secundario oculto">Me ajuda nessa ▸</button>
+</div></div>
+
+<div id="modalEscolha" class="modal"><div class="cartao">
+  <div class="etiqueta">Sua escolha</div>
+  <h2 id="escPergunta"></h2>
+  <div id="escOpcoes"></div>
+</div></div>
+
+<div id="modalTiming" class="modal"><div class="cartao">
+  <div class="etiqueta">Câmera na mão</div>
+  <h2 id="timTitulo"></h2>
+  <p id="timInstr"></p>
+  <div class="trilhoTim"><div id="timZona"></div><div id="timAlvo">🎯</div></div>
+  <p id="timMsg" style="min-height:20px;font-weight:800"></p>
+  <button id="timBotao" class="principal">Agora! 📸</button>
+</div></div>
+
+<div id="modalGaleria" class="modal"><div class="cartao galeria">
+  <div class="etiqueta" id="galTitulo">Fotos</div>
+  <div class="galBox"><button id="galAnt" class="galSeta" aria-label="Foto anterior">‹</button><img id="galImg" alt=""><button id="galProx" class="galSeta" aria-label="Próxima foto">›</button></div>
+  <p id="galLegenda"></p><div id="galCont"></div>
+  <button id="galFechar" class="principal">Continuar ▸</button>
+</div></div>
+
+<div id="modalVideo" class="modal"><div class="cartao">
+  <div class="etiqueta">Registro real</div>
+  <h2 id="vidTitulo"></h2>
+  <div id="vidBox"></div>
+  <p id="vidTexto" style="font-size:14px"></p>
+  <button id="vidFechar" class="principal">Pular ▸</button>
+</div></div>
+
+<div id="modalBordado" class="modal"><div class="cartao bordado">
+  <div class="etiqueta">Detalhe do colete</div>
+  <div class="tecido"><div class="bord">Lys 3.9.17<br>Luca 15.06.20</div><div class="cinta">22.03.12</div></div>
+  <p>Bordado no colete da renovação: as datas dos filhos. Na cinta, o dia do sim.</p>
+  <button id="bordadoFechar" class="principal">Continuar ▸</button>
+</div></div>
+
+<div id="modalPoderes" class="modal"><div class="cartao">
+  <div class="etiqueta">Poderes do Matheus</div>
+  <h2>O que ele aprendeu a fazer</h2>
+  <p style="font-size:14px">Não são superpoderes de filme. São jeitos de viver que foram crescendo com ele.</p>
+  <div id="listaPoderes"></div>
+  <button id="fecharPoderes" class="principal">Voltar ao jogo</button>
+</div></div>
+
+<div id="modalMidia" class="modal"><div class="cartao">
+  <div class="etiqueta" id="midiaEtiqueta">No palco</div>
+  <h2 id="midiaTitulo"></h2>
+  <div id="midiaConteudo"></div>
+  <p id="midiaTexto"></p>
+  <button id="midiaContinuar" class="principal">Continuar</button>
+</div></div>
+
+<div id="modalFinal" class="modal"><div class="cartao">
+  <div class="etiqueta" id="finalEtiqueta"></div>
+  <h2 id="finalTitulo"></h2>
+  <div id="finalFoto"></div>
+  <p id="finalTexto"></p>
+  <p id="finalTrecho"></p>
+  <div id="finalConq"></div>
+  <button id="finalBotao" class="principal">Voltar ao mapa ▸</button>
+</div></div>
+
+<div id="modalMusica" class="modal" style="z-index:40"><div class="cartao">
+  <div class="etiqueta">Opcional</div>
+  <h2>Músicas desta fase</h2>
+  <p style="font-size:14px">O vídeo aparece aqui, visível. O jogo fica pausado enquanto este painel estiver aberto.</p>
+  <div id="ytPlayer" class="oculto"></div>
+  <div id="listaYT"></div>
+  <button id="ytFechar" class="principal">Fechar e voltar ao jogo</button>
+</div></div>
+
+<div id="capa" class="tela"><div class="capaCx">
+  <div id="capaFoto"></div>
+  <div class="capaInfo">
+    <div id="capaNum"></div><h2 id="capaNome"></h2><div id="capaSub"></div>
+    <p id="capaLegenda"></p>
+    <button id="capaJogar" class="principal">Jogar ▶</button>
+    <button id="capaVoltar" class="secundario">Voltar ao mapa</button>
+  </div>
+</div></div>
+
+<div id="fraseTela" class="tela"><div class="fraseCx">
+  <div id="fraseNum"></div>
+  <p id="fraseTexto"></p>
+  <div id="fraseFotos"></div>
+  <button id="fraseContinuar" class="principal">Continuar ▸</button>
+</div></div>
+
+<div id="homenagem" class="tela"><div class="hCx">
+  <div class="hTopo">Para o Matheus</div>
+  <p id="hTexto"></p>
+  <div id="hAssin"></div>
+  <div class="hRodape"><span id="hCont"></span><button id="hTudo" class="secundario">Ler tudo</button></div>
+  <button id="hProx" class="principal">Continuar ▸</button>
+</div></div>
+
+<div id="album" class="tela">
+  <div id="albPalco"></div>
+  <div class="albCtl">
+    <button id="albAnt" aria-label="Anterior">‹</button>
+    <button id="albPausa" aria-label="Pausar">❚❚</button>
+    <button id="albProx" aria-label="Próxima">›</button>
+    <span id="albCont"></span>
+    <button id="albFechar" aria-label="Fechar">✕</button>
+  </div>
+</div>
+
+<div id="mapa" class="oculto">
+  <div id="mapaTopo">
+    <div class="tit"><b>A jornada do Matheus</b><span id="mapaProg"></span></div>
+    <button id="mapaAlbum" class="icone oculto" aria-label="Álbum da vida">📸</button>
+    <button id="mapaMensagem" class="icone oculto" aria-label="Mensagem do Jean">✉️</button>
+    <button id="mapaMusicas" class="icone" aria-label="Músicas">🎵</button>
+    <button id="mapaSom" class="icone" aria-label="Som">🔊</button>
+  </div>
+  <div class="abas"><button id="abaN1" class="aba on">Nível 1 · A história</button><button id="abaN2" class="aba">Nível 2 · Em breve 🔒</button></div>
+  <div id="mapaSvg"></div>
+  <div id="mapaCartao" class="oculto">
+    <div id="mcNum"></div><div id="mcNome"></div><div id="mcSub"></div>
+    <button id="mcEntrar" class="principal">Entrar ▸</button>
+  </div>
+  <button id="mapaApagar">apagar progresso</button>
+</div>
+<div id="mapaBanner"></div>
+
+<div id="inicio"><div class="caixa">
+  <div class="heroi"><div class="capaHeroi"></div><div class="copo" id="copo"></div><div class="brilhos">✦ ★ ✦</div></div>
+  <div class="fita">HAPPY BIRTHDAY</div>
+  <h1 id="tituloJogo">Super Matheus</h1>
+  <div class="sub" id="subJogo"></div>
+  <button id="comecar" class="principal">Start ▶</button>
+  <div class="aviso" id="avisoJogo"></div>
+  <div class="teclas">🔊 Ligue o som · Teclado: ← → andar · Espaço interagir · C camisa · M som</div>
+</div></div>
+
+<script src="dados.js"></script>
+<script src="jogo.js"></script>
+</body>
+</html>
