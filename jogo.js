@@ -85,7 +85,7 @@
   carregarImg('foto2', 'lys_1ano.jpg');
 
   /* -------------------- ÁUDIO -------------------- */
-  let ac = null, master = null, somLigado = true, musicaTimer = null, passoMusica = 0, audioEl = null;
+  let ac = null, master = null, somLigado = true, musicaTimer = null, passoMusica = 0, audioEl = null, giuAudio = null;
   let trilhaCfg = null, volTrilha = 0.5;
   let desbloqueado = false;
   function iniciarAudio() {
@@ -175,6 +175,29 @@
   function pararMusica() {
     if (musicaTimer) { clearInterval(musicaTimer); musicaTimer = null; }
     if (audioEl) { audioEl.pause(); audioEl = null; }
+    pararMusicaGiu();
+  }
+  /* música da Giu no palco (Paramore), começa em D.midia.musicaGiuInicio segundos */
+  function pararMusicaGiu() {
+    if (giuAudio) { try { giuAudio.pause(); } catch (e) { /* ok */ } giuAudio = null; }
+  }
+  function iniciarMusicaGiu(aoTerminar) {
+    pararMusicaGiu();
+    if (!D.midia.musicaGiu) return false;
+    const a = new Audio(D.midia.musicaGiu);
+    giuAudio = a; a.preload = 'auto'; a.volume = 0.9; a.muted = !somLigado;
+    const inicio = D.midia.musicaGiuInicio || 0;
+    let posicionou = false;
+    const posicionar = () => {
+      if (posicionou || !inicio) return;
+      try { a.currentTime = inicio; posicionou = true; } catch (e) { /* tenta de novo no canplay */ }
+    };
+    a.addEventListener('loadedmetadata', posicionar);
+    a.addEventListener('canplay', posicionar);
+    a.addEventListener('ended', () => { if (giuAudio === a) { giuAudio = null; if (aoTerminar) aoTerminar(); } });
+    a.play().catch(() => { if (giuAudio === a) { giuAudio = null; if (aoTerminar) aoTerminar(); } });
+    posicionar();
+    return true;
   }
   const trilhaMapa = { bpm: 96, acordes: [130.81, 98.0, 110, 87.31] };
   /* som ambiente de cada lugar */
@@ -491,7 +514,11 @@
       const i = document.createElement('img');
       i.src = D.midia.imagemGiu; i.alt = 'Giu no palco'; i.onerror = fallback; cont.appendChild(i);
     } else fallback();
-    midiaAoFechar = () => { show.fase = 'final'; show.t = 0; som('plateia'); };
+    midiaAoFechar = () => { show.fase = 'final'; show.t = 0; som('plateia'); iniciarMusicaShow(); };
+    const btn = $('midiaContinuar');
+    pararMusica();
+    if (iniciarMusicaGiu(() => { btn.textContent = 'Continuar ▸'; })) btn.textContent = 'Pular ⏭';
+    else btn.textContent = 'Continuar';
     $('modalMidia').classList.add('on');
   }
   function ilustracaoProvisoria() {
@@ -512,6 +539,7 @@
   let midiaAoFechar = null;
   $('midiaContinuar').addEventListener('click', () => {
     const v = $('midiaConteudo').querySelector('video'); if (v) v.pause();
+    pararMusicaGiu(); $('midiaContinuar').textContent = 'Continuar';
     $('modalMidia').classList.remove('on');
     const cb = midiaAoFechar; midiaAoFechar = null;
     if (cb) cb();
@@ -1426,6 +1454,7 @@
     somLigado = !somLigado;
     $('som').textContent = $('mapaSom').textContent = somLigado ? '🔊' : '🔇';
     if (audioEl) audioEl.muted = !somLigado;
+    if (giuAudio) giuAudio.muted = !somLigado;
     if (somLigado) iniciarAudio();
   }
   window.addEventListener('keydown', (e) => {

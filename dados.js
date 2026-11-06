@@ -186,7 +186,9 @@ window.DADOS = {
     telaoPub: "volgan_arte.jpg",         // arte no telão do palco
     gen2k: "gen2k.jpg",                   // cartaz na fase 6
     logoVolgan: null,
-    audioShow: null    // áudio autorizado, ex.: "show.mp3". null = rock sintetizado próprio
+    audioShow: null,   // áudio autorizado, ex.: "show.mp3". null = rock sintetizado próprio
+    musicaGiu: "misery_business.mp3",   // Paramore - Misery Business, toca quando a Giu entra no palco
+    musicaGiuInicio: 100                // segundo em que começa (1:40)
   },
 
   /* ---------------- MÚSICA ----------------
